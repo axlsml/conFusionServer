@@ -186,6 +186,13 @@ dishRouter.route('/:dishId/comments/:commentId')
         Dishes.findById(req.params.dishId)
             .then((dish) => {
                 if (dish != null && dish.comments.id(req.params.commentId) != null) {
+                    let commentAuthor = dish.comments.id(req.params.commentId).author;
+                    let authenticatedUser = req.user._id;
+                    if (!commentAuthor.equals(authenticatedUser)) {
+                        err = new Error('You are not authorized to alter other peoples comments');
+                        err.status = 403;
+                        return next(err);
+                    }
                     if (req.body.rating) {
                         dish.comments.id(req.params.commentId).rating = req.body.rating;
                     }
@@ -216,6 +223,13 @@ dishRouter.route('/:dishId/comments/:commentId')
         Dishes.findById(req.params.dishId)
             .then((dish) => {
                 if (dish != null && dish.comments.id(req.params.commentId) != null) {
+                    let commentAuthor = dish.comments.id(req.params.commentId).author;
+                    let authenticatedUser = req.user._id;
+                    if (!commentAuthor.equals(authenticatedUser)) {
+                        err = new Error('You are not authorized to delete other peoples comments');
+                        err.status = 403;
+                        return next(err);
+                    }
                     dish.comments.id(req.params.commentId).remove();
                     dish.save()
                         .then((dish) => {
